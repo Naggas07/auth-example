@@ -36,15 +36,30 @@ module.exports.create = (req, res, next) => {
 }
 
 module.exports.validate = (req, res, next) => {
-  res.send('TODO!')
+  User.findOneAndUpdate({validateToken: req.params.token}, {$set: {validated: true}}, {new: true})
+    .then(user => {
+      res.render('users/login')
+    })
+    .catch(error => next(error))
 }
 
 module.exports.login = (_, res) => {
-  res.send('TODO!')
+  res.render('users/login')
 }
 
 module.exports.doLogin = (req, res, next) => {
-  res.send('TODO!')
+  const {email, password} = req.body
+  User.find({email: email})
+    .then(user => {
+      user.checkPassword(password)
+       .then((user) => {
+        req.sesion.user = user
+        res.redirect('/users')
+       }
+         ) 
+      .catch(res.redirect('/login'))        
+    })
+    .catch( error => next(error))
 }
 
 module.exports.logout = (req, res) => {
